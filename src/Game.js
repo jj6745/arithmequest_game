@@ -1,97 +1,113 @@
 import React, { useState } from "react";
-import solve from "./Solve"; // Import the solve function from Solve.js
 import Timer from "./Timer";
-import "./App.css"
+import GenerateQuestion from "./Generate";
+import Solve from "./Solve";
+import "./App.css";
 export default function Game() {
-  const [num1, setNum1] = useState(0);
-  const [num2, setNum2] = useState(0);
-  const [target, setTarget] = useState(0);
-  const [answer, setAnswer] = useState("");
+  const [nums, setNums] = useState([0, 0, 0]);
+  var [answer, setAnswer] = useState("");
   const [score, setScore] = useState(0);
   const [startGame, setStartGame] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
   const generateQuestion = () => {
-    setNum1(Math.ceil(Math.random() * 10));
-    setNum2(Math.ceil(Math.random() * 10));
-    setTarget(Math.ceil(Math.random() * 10));
+    const newQuestion = GenerateQuestion(2);//change difficulty here 2 is easy 3 is medium 4 is hard
+    setNums(newQuestion);
     setAnswer("");
   };
-
   const submit = (e) => {
     e.preventDefault();
-    // Regular expression to check for a valid input format (e.g., "0+0" or "0-0")
-    const validInputRegex = /^\d+\s*[-+]\s*\d+/;
-
-    // Check if the answer matches the valid input format
-    const formValid = validInputRegex.test(answer);
-
-    if (!formValid) {
-      return;
-    }
-
-    // Extracting the numbers and operator from the input string
-    const [n1, operator, n2] = answer.split(/\s*([-+])\s*/);
-    console.log(operator);
-    const solutions = solve(+n1, +n2, +target);
-
-    // Check if the answer is correct by calling the solve function and checking if the user's input is in the set of solutions
-    if (solutions.has(answer)) {
+    var nums_except_last = nums.slice(0, nums.length - 1);
+    var s = Solve(nums_except_last, nums[nums.length - 1]);
+    console.log(s);
+    if (s.has(answer)) {
       setScore((score) => score + 1);
+      generateQuestion();
     }
-
-    generateQuestion();
   };
 
-  // Function to start the game and timer
   const startGameHandler = () => {
     generateQuestion();
     setStartGame(true);
     setGameOver(false);
   };
 
-  // Function to handle timer completion
   const handleTimerComplete = () => {
     console.log(`Game Over! Final score: ${score}`);
     setGameOver(true);
   };
 
   return (
-    <div className="center-container">
-      
+    <div className="center-container container mt-5">
       {startGame && !gameOver && (
         <>
-          <Timer max={10} score={score} onComplete={handleTimerComplete} />
+          <Timer max={30}  score={score} onComplete={handleTimerComplete} /> 
+          Use all the numbers provided to get to the target number!
+          <div className="mb-3">
+              <button className="btn btn-primary m-2" type="submit">
+                {nums[nums.length - 1]}
+              </button>
+            </div>
           <form onSubmit={submit}>
-            <div>
-              <label>
-                {num1} , {num2}, {target}
-              </label>
+            <div className="mb-3">
               <input
+                className="form-control"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 type="text"
               />
             </div>
-            <button className="game-button" type="submit">
-              Check
-            </button>
+
+            <div className="mb-3">
+              {nums.slice(0, nums.length - 1).map((num, index) => (
+                <button className="btn btn-primary m-1"
+                  key={index}
+                  onClick={() => setAnswer((prevAnswer) => prevAnswer + num)}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
           </form>
-          <button className="game-button" onClick={generateQuestion}>
-            Skip
+          <div className="mb-3">
+            <button className="btn btn-secondary m-1"
+              onClick={() => setAnswer(answer + "+")}
+            >
+              +
+            </button>
+            <button className="btn btn-secondary m-1"
+              onClick={() => setAnswer(answer + "-")}
+            >
+              -
+            </button>
+            <button className="btn btn-secondary m-1"
+              onClick={() => setAnswer(answer + "*")}
+            >
+              *
+            </button>
+            <button className="btn btn-secondary m-1"
+              onClick={() => setAnswer(answer + "/")}
+            >
+              /
+            </button>
+          </div>
+          <div className="mb-3">
+            <button className="btn btn-warning m-1" onClick={() => setAnswer("")}>
+              RESET
+            </button>
+          </div>
+          <button className="btn btn-danger m-1" onClick={generateQuestion}>
+            SKIP
           </button>
-          <p className="score">Score: {score}</p>
+          <p className="score mt-3">Score: {score}</p>
         </>
       )}
       {!startGame && (
-        <button className="start-button" onClick={startGameHandler}>
+        <button className="btn btn-success m-1" onClick={startGameHandler}>
           Start Game
         </button>
       )}
-      <button className="login-button" type="submit">
-        Login
-      </button>
+      <button>change difficulty</button>
     </div>
   );
-  
-}
+      }  
