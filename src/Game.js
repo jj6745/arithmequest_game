@@ -9,12 +9,32 @@ export default function Game() {
   const [score, setScore] = useState(0);
   const [startGame, setStartGame] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-
+  const [difficulty, setDifficulty] = useState("easy");
+  const toggleDifficulty = () => {
+    if (difficulty === "easy") {
+      setDifficulty("medium");
+    } else if (difficulty === "medium") {
+      setDifficulty("hard");
+    } else {
+      setDifficulty("easy");
+    }
+  };
+  
   const generateQuestion = () => {
-    const newQuestion = GenerateQuestion(2);//change difficulty here 2 is easy 3 is medium 4 is hard
+    let difficultyLevel;
+    if (difficulty === "easy") {
+      difficultyLevel = 2;
+    } else if (difficulty === "medium") {
+      difficultyLevel = 3;
+    } else if (difficulty === "hard") {
+      difficultyLevel = 4;
+    }
+  
+    const newQuestion = GenerateQuestion(difficultyLevel);
     setNums(newQuestion);
     setAnswer("");
   };
+  
   const submit = (e) => {
     e.preventDefault();
     var nums_except_last = nums.slice(0, nums.length - 1);
@@ -107,7 +127,9 @@ export default function Game() {
           Start Game
         </button>
       )}
-      <button>change difficulty</button>
-    </div>
-  );
+    <button className="btn btn-info m-1" onClick={toggleDifficulty}>
+      Change Difficulty: {difficulty}
+    </button>
+  </div>
+);
       }  
